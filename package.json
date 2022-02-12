@@ -1,0 +1,37 @@
+{
+  "name": "open-pr",
+  "version": "0.1.0",
+  "description": "A command to open the pullrequest from the local branch",
+  "main": "dist/op.js",
+  "bin": {
+    "op": "dist/op.js"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild index.js --bundle --outfile=dist/op.js --platform=node --target=node12 --external:./node_modules/*",
+    "dev": "npm run build -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-sureshraj/open-pr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m-sureshraj/open-pr/issues"
+  },
+  "homepage": "https://github.com/m-sureshraj/open-pr#readme",
+  "dependencies": {
+    "conf": "^10.1.1",
+    "git-url-parse": "^11.6.0",
+    "node-fetch": "^2.6.7",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.21"
+  }
+}
