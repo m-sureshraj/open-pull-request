@@ -1,7 +1,8 @@
 {
-  "name": "open-pr",
+  "name": "open-pull-request",
   "version": "0.1.0",
-  "description": "A command to open the pullrequest from the local branch",
+  "description": "A CLI command to open the associated pull request of a branch in the browser",
+  "license": "MIT",
   "main": "dist/op.js",
   "bin": {
     "op": "dist/op.js"
@@ -9,22 +10,31 @@
   "engines": {
     "node": ">=12"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --write",
     "build": "esbuild index.js --bundle --outfile=dist/op.js --platform=node --target=node12 --external:./node_modules/*",
     "dev": "npm run build -- --watch"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/m-sureshraj/open-pr.git"
+    "url": "git+https://github.com/m-sureshraj/open-pull-request.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "prettier": "@sureshraj/prettier-config",
+  "keywords": [
+    "open-pr",
+    "pull-request",
+    "cli",
+    "local-branch"
+  ],
+  "author": "Sureshraj <m.s.suresh100@gmail.com>",
   "bugs": {
-    "url": "https://github.com/m-sureshraj/open-pr/issues"
+    "url": "https://github.com/m-sureshraj/open-pull-request/issues"
   },
-  "homepage": "https://github.com/m-sureshraj/open-pr#readme",
+  "homepage": "https://github.com/m-sureshraj/open-pull-request#readme",
   "dependencies": {
     "conf": "^10.1.1",
     "git-url-parse": "^11.6.0",
@@ -32,6 +42,8 @@
     "open": "^8.4.0"
   },
   "devDependencies": {
-    "esbuild": "^0.14.21"
+    "@sureshraj/prettier-config": "^1.0.0",
+    "esbuild": "^0.14.21",
+    "prettier": "^2.5.1"
   }
 }

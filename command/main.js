@@ -22,65 +22,84 @@ const query = `
 `;
 
 export async function main() {
-    if (!isGitRepository()) {
-        console.log(yellow('Not a git repository'));
-        return;
+  if (!isGitRepository()) {
+    console.log(yellow('Not a git repository'));
+    return;
+  }
+
+  let branchName = '';
+  try {
+    branchName = getBranchName();
+  } catch (error) {
+    console.error(red('Can not find the branch name'));
+    console.error(error);
+  }
+
+  let remoteUrl = '';
+  try {
+    remoteUrl = getRemoteUrl();
+  } catch (error) {
+    console.error(red('Can not find the remote url'));
+    console.error(error);
+  }
+
+  const { owner: repoOwner, name: repoName } = gitParseUrl(remoteUrl);
+
+  const config = new Conf();
+  const token = config.get('token');
+  if (!token) {
+    console.warn(
+      gray(
+        'Warning: Access token not provided. Cannot search pull-requests on private repositories.'
+      )
+    );
+  }
+
+  const loader = new Loader();
+
+  try {
+    const options = {
+      method: 'post',
+      body: JSON.stringify({
+        query,
+        variables: {
+          repoOwner,
+          repoName,
+          branchName,
+        },
+      }),
+    };
+
+    if (token) {
+      options.headers = {
+        authorization: `Bearer ${token}`,
+      };
     }
 
-    let branchName = '';
-    try {
-        branchName = getBranchName();
-    } catch (error) {
-        console.error(red('Can not find the branch name'));
-        console.error(error);
+    loader.start();
+    const response = await fetch('https://api.github.com/graphql', options);
+    loader.stop();
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      // todo: add a help message
+      console.log(red(message));
+      return;
     }
 
-    let remoteUrl = '';
-    try {
-        remoteUrl = getRemoteUrl();
-    } catch (error) {
-        console.error(red('Can not find the remote url'));
-        console.error(error);
+    const { data } = await response.json();
+    const { node } = data.repository.pullRequests.edges[0] ?? {};
+
+    if (!node) {
+      console.log(`No open pull request exists for the given branch: ${yellow(branchName)}`);
+      return;
     }
 
-    const { owner: repoOwner, name: repoName } = gitParseUrl(remoteUrl);
-
-    const config = new Conf();
-    const token = config.get('token');
-    if (!token) {
-        console.warn(gray('Warning: Access token not provided. Cannot search pull-requests on private repositories.'));
-    }
-
-    const loader = new Loader();
-
-    try {
-        const options = {
-            method: 'post',
-            body: JSON.stringify({
-                query,
-                variables: {
-                    repoOwner,
-                    repoName,
-                    branchName
-                },
-            }),
-        };
-
-        if (token) {
-            options.headers = {
-                authorization: 'Bearer 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',
-            };
-        }
-
-        loader.start();
-        // const response = await fetch('https://api.github.com/graphql', options);
-        // const { data } = await response.json();
-        // loader.stop();
-
-        console.log(data?.repository);
-    } catch (error) {
-        loader.stop();
-        console.error(red('Encountered an issue while fetching the data'));
-        console.error(error);
-    }
+    console.log(`${yellow('PR link:')} ${node.url}`);
+    await open(node.url);
+  } catch (error) {
+    loader.stop();
+    console.error(red('An unknown issue occurred'));
+    console.error(error);
+  }
 }

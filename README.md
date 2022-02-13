@@ -1,2 +1,2 @@
-# open-pr
-A command to open the pullrequest from the local branch
+# open-pull-request
+A command to open the pull request from the local branch
