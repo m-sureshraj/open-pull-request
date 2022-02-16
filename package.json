@@ -1,6 +1,6 @@
 {
   "name": "open-pull-request",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A command-line utility to open the associated pull request of the branch in the browser",
   "license": "MIT",
   "main": "dist/op.js",
@@ -14,7 +14,6 @@
     "dist"
   ],
   "scripts": {
-    "preversion": "",
     "version": "npm run build -- --minify",
     "postversion": "git push && git push --tags && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1",
