@@ -46,5 +46,11 @@ open-pull-request (v0.1.0)
    op help 	Show this message
 ```
 
+## Todo
+- [ ] Add an option to view debug logs. e.g `op --debug`
+- [ ] Lint setup & testing
+- [ ] CI Setup for running lint & tests
+- [ ] Support other code hosting services such as Bitbucket and GitLab.
+
 ## license
 MIT © [Sureshraj](https://github.com/m-sureshraj)
