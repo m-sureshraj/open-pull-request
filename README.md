@@ -46,6 +46,8 @@ open-pull-request (v0.1.0)
    op 		open the associated pull request of the branch in the browser
    op token 	Add personal access token
    op help 	Show this message
+
+ All these commands optionally take --debug option to log debug messages
 ```
 
 ## license
