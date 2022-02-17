@@ -4,8 +4,9 @@ import open from 'open';
 import Conf from 'conf';
 
 import { isGitRepository, getBranchName, getRemoteUrl } from '../lib/git';
-import { red, yellow, gray } from '../lib/colors';
+import { red, yellow } from '../lib/colors';
 import { Loader } from '../lib/loader';
+import { debug } from '../lib/util';
 
 const query = `
    query findOpenPullRequest($repoOwner: String!, $repoName: String!, $branchName: String!) {
@@ -30,29 +31,32 @@ export async function main() {
   let branchName = '';
   try {
     branchName = getBranchName();
+    debug({ branchName });
   } catch (error) {
     console.error(red('Can not find the branch name'));
     console.error(error);
+    return;
   }
 
   let remoteUrl = '';
   try {
     remoteUrl = getRemoteUrl();
+    debug({ remoteUrl });
   } catch (error) {
     console.error(red('Can not find the remote url'));
     console.error(error);
+    return;
   }
 
   const { owner: repoOwner, name: repoName } = gitParseUrl(remoteUrl);
+  debug({ repoOwner, repoName });
 
   const config = new Conf();
   const token = config.get('token');
   if (!token) {
-    console.warn(
-      gray(
-        'Warning: Access token not provided. Cannot search pull-requests on private repositories.'
-      )
-    );
+    console.error(red('Access token not provided'));
+    console.log('Refer to the setup instruction: https://github.com/m-sureshraj/open-pull-request#setup');
+    return;
   }
 
   const loader = new Loader();
@@ -60,6 +64,9 @@ export async function main() {
   try {
     const options = {
       method: 'post',
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         query,
         variables: {
@@ -69,28 +76,26 @@ export async function main() {
         },
       }),
     };
-
-    if (token) {
-      options.headers = {
-        authorization: `Bearer ${token}`,
-      };
-    }
+    debug({ queryParams: { ...options, headers: { authorization: 'Bearer ****' }} });
 
     loader.start();
     const response = await fetch('https://api.github.com/graphql', options);
+    debug({ status: response.status, statusText: response.statusText });
     loader.stop();
 
     if (!response.ok) {
-      const { message } = await response.json();
-      // todo: add a help message
-      console.log(red(message));
+      const data = await response.json();
+      debug({ data });
+      console.log(red(data.message));
       return;
     }
 
     const { data } = await response.json();
+    debug(`Received data: `, { data: JSON.stringify(data) });
     const { node } = data.repository.pullRequests.edges[0] ?? {};
 
     if (!node) {
+      debug({ node });
       console.log(`No open pull request exists for the given branch: ${yellow(branchName)}`);
       return;
     }
@@ -99,7 +104,7 @@ export async function main() {
     await open(node.url);
   } catch (error) {
     loader.stop();
-    console.error(red('An unknown issue occurred'));
+    console.error(red('An unknown error occurred'));
     console.error(error);
   }
 }
